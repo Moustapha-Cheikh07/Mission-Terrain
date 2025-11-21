@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Merlin Gerin - Dashboard Qualité</title>
-    <link rel="stylesheet" href="assets/styles/main.css">
-    <link rel="stylesheet" href="assets/styles/components.css">
-    <link rel="stylesheet" href="assets/styles/responsive.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -151,6 +151,159 @@
                             <h4>Formation complétée</h4>
                             <p>Concepts qualité de base - Hier</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reject Analysis Section -->
+            <div class="rejects-analysis">
+                <!-- Google Sheets Integration Section -->
+                <div class="google-sheets-section" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border: 2px solid #4caf50; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <h3 style="margin: 0; color: #1b5e20; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <svg style="width: 24px; height: 24px;" viewBox="0 0 24 24">
+                                    <path fill="#0f9d58" d="M19,11V9H11V5H9V9H5V11H9V19H11V11H19M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19Z" />
+                                </svg>
+                                Connexion Google Sheets
+                            </h3>
+                            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #2e7d32;">
+                                Synchronisation automatique quotidienne à 8h avec votre document Google Sheets
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                            <button type="button" id="google-sheets-config-btn" class="action-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: #4caf50;">
+                                <i class="fas fa-cog"></i>
+                                <span>Configuration</span>
+                            </button>
+                            <button type="button" id="google-sheets-refresh-btn" class="action-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: #ff9800;">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Actualiser maintenant</span>
+                            </button>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: white; border-radius: 6px; cursor: pointer; border: 1px solid #4caf50;">
+                                <input type="checkbox" id="google-sheets-auto-refresh" style="cursor: pointer;">
+                                <span style="font-size: 0.9rem; color: #1b5e20;">Actualisation auto (tous les jours à 8h)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="google-sheets-status" class="alert alert-info" style="display: none;"></div>
+                </div>
+
+                <div class="section-header" style="border-bottom: none; padding-bottom: 1rem; margin-bottom: 1rem;">
+                    <h2>Analyse des Rebuts</h2>
+                    <div class="filter-controls">
+                        <select id="reject-machine-filter" class="filter-select">
+                            <option value="all">Toutes les machines</option>
+                            <option value="850MS158">850MS158</option>
+                            <option value="850MS150">850MS150</option>
+                            <option value="850MS146">850MS146</option>
+                            <option value="850MS144">850MS144</option>
+                            <option value="850MS143">850MS143</option>
+                            <option value="850MS135">850MS135</option>
+                            <option value="850MS130">850MS130</option>
+                            <option value="850MS125">850MS125</option>
+                            <option value="850MS123">850MS123</option>
+                            <option value="850MS122">850MS122</option>
+                            <option value="850MS120">850MS120</option>
+                            <option value="850MS117">850MS117</option>
+                            <option value="850MS091">850MS091</option>
+                            <option value="850MS087">850MS087</option>
+                            <option value="850MS085">850MS085</option>
+                            <option value="850MS077">850MS077</option>
+                            <option value="850MS073">850MS073</option>
+                            <option value="850MS071">850MS071</option>
+                            <option value="850MS070">850MS070</option>
+                            <option value="850MS161">850MS161</option>
+                            <option value="850MS157">850MS157</option>
+                            <option value="850MS155">850MS155</option>
+                        </select>
+                        <input type="date" id="reject-start-date" class="filter-select" placeholder="Date début">
+                        <input type="date" id="reject-end-date" class="filter-select" placeholder="Date fin">
+                        <!-- Bouton Filtrer masqué : le filtrage se fait automatiquement -->
+                        <button id="apply-reject-filters" class="action-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; display: none;">
+                            <i class="fas fa-filter"></i>
+                            <span>Filtrer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="rejects-loading" class="loading-container" style="display: none;">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Chargement des données depuis Google Sheets...</p>
+                    </div>
+                </div>
+
+                <!-- Cost Summary Cards -->
+                <div class="reject-stats-grid" id="reject-stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i class="fas fa-euro-sign"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-reject-cost">0€</h3>
+                            <p>Coût total des rebuts</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-reject-quantity">0</h3>
+                            <p>Quantité totale</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <i class="fas fa-industry"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="most-expensive-machine">-</h3>
+                            <p>Machine la plus coûteuse</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="average-reject-cost">0€</h3>
+                            <p>Coût moyen par rebut</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rejects Chart and Table -->
+                <div class="rejects-container">
+                    <!-- Chart Section -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Évolution des pertes par machine</h3>
+                            <div class="chart-legend" id="reject-chart-legend"></div>
+                        </div>
+                        <canvas id="reject-cost-chart"></canvas>
+                        <div id="reject-chart-tooltip" class="chart-tooltip"></div>
+                    </div>
+
+                    <!-- Cost by Machine Table -->
+                    <div class="results-table-container">
+                        <h3>Coûts des rebuts par machine</h3>
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Machine</th>
+                                    <th>Quantité totale</th>
+                                    <th>Coût unitaire moyen</th>
+                                    <th>Coût total</th>
+                                    <th>% du total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="machine-costs-table-body">
+                                <!-- Données générées par JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -304,113 +457,83 @@
                 <h1>Formulaires</h1>
             </div>
 
+            <!-- Fiche Étoile Form -->
             <div class="forms-container">
-                <!-- Quality Check Form -->
                 <div class="form-card">
                     <div class="form-header">
-                        <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
-                        <h2>Contrôle qualité terminé</h2>
+                        <i class="fas fa-star" style="color: #f59e0b;"></i>
+                        <h2>Fiche Étoile - Produit Défectueux</h2>
                     </div>
-                    <form id="quality-check-form" class="quality-form">
+                    <form id="fiche-etoile-form" class="quality-form">
                         <div class="form-group">
-                            <label for="check-date">Date du contrôle</label>
-                            <input type="date" id="check-date" required>
+                            <label for="fiche-reference">Référence</label>
+                            <input type="text" id="fiche-reference" placeholder="Ex: REF-2025-001" required>
                         </div>
                         <div class="form-group">
-                            <label for="check-line">Ligne de production</label>
-                            <select id="check-line" required>
-                                <option value="">Sélectionner une ligne</option>
-                                <option value="A">Ligne A</option>
-                                <option value="B">Ligne B</option>
-                                <option value="C">Ligne C</option>
-                                <option value="D">Ligne D</option>
-                            </select>
+                            <label for="fiche-emetteur">Émetteur</label>
+                            <input type="text" id="fiche-emetteur" placeholder="Nom de l'émetteur" required>
                         </div>
                         <div class="form-group">
-                            <label for="check-reference">Référence produit</label>
-                            <input type="text" id="check-reference" placeholder="Ex: MG-2025-001" required>
+                            <label for="fiche-date-fabrication">Date de fabrication</label>
+                            <input type="date" id="fiche-date-fabrication" required>
                         </div>
                         <div class="form-group">
-                            <label for="check-quantity">Quantité contrôlée</label>
-                            <input type="number" id="check-quantity" min="1" required>
+                            <label for="fiche-date">Date</label>
+                            <input type="date" id="fiche-date" required>
                         </div>
                         <div class="form-group">
-                            <label for="check-status">Résultat du contrôle</label>
-                            <select id="check-status" required>
-                                <option value="">Sélectionner un résultat</option>
-                                <option value="success">Conforme</option>
-                                <option value="warning">À vérifier</option>
-                                <option value="danger">Non-conforme</option>
-                            </select>
+                            <label for="fiche-quantite">Quantité</label>
+                            <input type="number" id="fiche-quantite" min="1" required>
                         </div>
                         <div class="form-group">
-                            <label for="check-notes">Notes / Observations</label>
-                            <textarea id="check-notes" rows="4" placeholder="Ajouter des notes sur le contrôle..."></textarea>
+                            <label for="fiche-avis-qualite">N° avis qualité</label>
+                            <input type="text" id="fiche-avis-qualite" placeholder="Ex: AQ-2025-001">
                         </div>
                         <div class="form-group">
-                            <label for="check-operator">Opérateur</label>
-                            <input type="text" id="check-operator" placeholder="Votre nom" required>
+                            <label for="fiche-description">Description du problème</label>
+                            <textarea id="fiche-description" rows="4" placeholder="Décrivez le problème rencontré..." required></textarea>
                         </div>
-                        <button type="submit" class="submit-btn">
-                            <i class="fas fa-check"></i>
-                            Enregistrer le contrôle
-                        </button>
+                        <div class="form-group">
+                            <label for="fiche-actions">Actions</label>
+                            <textarea id="fiche-actions" rows="3" placeholder="Actions correctives à mettre en place..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="fiche-delai">Délai</label>
+                            <input type="date" id="fiche-delai" required>
+                        </div>
+                        <div class="form-actions" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                            <button type="submit" class="submit-btn" style="flex: 1;">
+                                <i class="fas fa-paper-plane"></i>
+                                Envoyer la fiche
+                            </button>
+                            <button type="button" id="preview-fiche-btn" class="action-btn" style="flex: 1; background: #3b82f6;">
+                                <i class="fas fa-eye"></i>
+                                Prévisualiser
+                            </button>
+                            <button type="button" id="print-fiche-btn" class="action-btn" style="flex: 1; background: #8b5cf6;">
+                                <i class="fas fa-print"></i>
+                                Imprimer
+                            </button>
+                            <button type="button" id="download-excel-btn" class="action-btn" style="flex: 1; background: #10b981;">
+                                <i class="fas fa-file-excel"></i>
+                                Télécharger Excel
+                            </button>
+                        </div>
                     </form>
                 </div>
+            </div>
 
-                <!-- Reject Declaration Form -->
-                <div class="form-card">
-                    <div class="form-header">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <h2>Déclaration de rebut</h2>
+            <!-- Fiches Étoiles Envoyées -->
+            <div class="fiches-list-section" style="margin-top: 2rem;">
+                <div class="section-header" style="border-bottom: none; padding-bottom: 1rem;">
+                    <h2>Fiches Étoiles envoyées</h2>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="fiches-search" placeholder="Rechercher une fiche...">
                     </div>
-                    <form id="reject-form" class="quality-form">
-                        <div class="form-group">
-                            <label for="reject-date">Date de détection</label>
-                            <input type="date" id="reject-date" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="reject-line">Ligne de production</label>
-                            <select id="reject-line" required>
-                                <option value="">Sélectionner une ligne</option>
-                                <option value="A">Ligne A</option>
-                                <option value="B">Ligne B</option>
-                                <option value="C">Ligne C</option>
-                                <option value="D">Ligne D</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="reject-reference">Référence produit</label>
-                            <input type="text" id="reject-reference" placeholder="Ex: MG-2024-001" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="reject-quantity">Quantité</label>
-                            <input type="number" id="reject-quantity" min="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="reject-reason">Raison du rebut</label>
-                            <select id="reject-reason" required>
-                                <option value="">Sélectionner une raison</option>
-                                <option value="dimension">Non-conformité dimensionnelle</option>
-                                <option value="appearance">Défaut d'aspect</option>
-                                <option value="function">Défaut fonctionnel</option>
-                                <option value="material">Défaut matière</option>
-                                <option value="other">Autre</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="reject-description">Description détaillée</label>
-                            <textarea id="reject-description" rows="4" placeholder="Décrire le problème en détail..." required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="reject-operator">Opérateur</label>
-                            <input type="text" id="reject-operator" placeholder="Votre nom" required>
-                        </div>
-                        <button type="submit" class="submit-btn">
-                            <i class="fas fa-paper-plane"></i>
-                            Envoyer la déclaration
-                        </button>
-                    </form>
+                </div>
+                <div id="fiches-list" class="training-documents-list">
+                    <!-- Fiches will be generated by JS -->
                 </div>
             </div>
         </section>
@@ -537,6 +660,133 @@
     <!-- Success/Error Messages -->
     <div id="message-toast" class="toast"></div>
 
+    <!-- Google Sheets Configuration Modal -->
+    <div id="google-sheets-config-modal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg style="width: 24px; height: 24px;" viewBox="0 0 24 24">
+                        <path fill="#0f9d58" d="M19,11V9H11V5H9V9H5V11H9V19H11V11H19M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19Z" />
+                    </svg>
+                    Configuration Google Sheets
+                </h2>
+                <button class="close-modal" onclick="document.getElementById('google-sheets-config-modal').style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #1565c0;">
+                        <i class="fas fa-info-circle"></i> Instructions de configuration
+                    </h4>
+                    <ol style="margin: 0; padding-left: 1.5rem; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Clé API Google</strong> : Obtenez une clé API depuis <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #2196f3;">Google Cloud Console</a></li>
+                        <li><strong>ID du Spreadsheet</strong> : Copiez l'ID depuis l'URL de votre Google Sheet</li>
+                        <li><strong>Plage</strong> : Spécifiez la plage (ex: Sheet1!A:K pour toutes les colonnes A à K)</li>
+                    </ol>
+                </div>
+
+                <form id="google-sheets-config-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="google-sheets-api-key" style="font-weight: 500; margin-bottom: 0.5rem; display: block;">
+                            Clé API Google *
+                        </label>
+                        <input
+                            type="text"
+                            id="google-sheets-api-key"
+                            placeholder="AIzaSy..."
+                            required
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;"
+                        >
+                        <small style="color: #666; font-size: 0.85rem;">
+                            Obtenez votre clé API depuis Google Cloud Console
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="google-sheets-spreadsheet-id" style="font-weight: 500; margin-bottom: 0.5rem; display: block;">
+                            ID ou URL du Spreadsheet *
+                        </label>
+                        <input
+                            type="text"
+                            id="google-sheets-spreadsheet-id"
+                            placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms ou URL complète"
+                            required
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;"
+                        >
+                        <small style="color: #666; font-size: 0.85rem;">
+                            L'ID se trouve dans l'URL : docs.google.com/spreadsheets/d/<strong>ID</strong>/edit
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="google-sheets-range" style="font-weight: 500; margin-bottom: 0.5rem; display: block;">
+                            Plage de données
+                        </label>
+                        <input
+                            type="text"
+                            id="google-sheets-range"
+                            placeholder="CONFIRMATION BRIDGE!A:AT"
+                            value="CONFIRMATION BRIDGE!A:AT"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;"
+                        >
+                        <small style="color: #666; font-size: 0.85rem;">
+                            Format : NomFeuille!ColonneDébut:ColonneFin (ex: CONFIRMATION BRIDGE!A:AT)
+                        </small>
+                    </div>
+
+                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin-top: 0.5rem;">
+                        <strong style="color: #856404;">
+                            <i class="fas fa-lock-open"></i> Permissions requises :
+                        </strong>
+                        <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem; font-size: 0.85rem;">
+                            <li>Activez l'API Google Sheets dans Google Cloud Console</li>
+                            <li>Partagez votre Google Sheet en lecture publique OU</li>
+                            <li>Configurez les autorisations OAuth (pour accès privé)</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 0.5rem; justify-content: flex-end; padding: 1rem; border-top: 1px solid #ddd;">
+                <button type="button" id="cancel-google-sheets-config" class="cancel-btn" style="padding: 0.75rem 1.5rem;">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button type="button" id="save-google-sheets-config" class="submit-btn" style="padding: 0.75rem 1.5rem; background: #4caf50;">
+                    <i class="fas fa-save"></i> Sauvegarder
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fiche Étoile Preview Modal -->
+    <div id="fiche-etoile-modal" class="modal viewer-modal">
+        <div class="modal-content fiche-etoile-modal-content">
+            <div class="viewer-header">
+                <h2>Fiche Étoile - Produit Défectueux</h2>
+                <button class="close-viewer" id="close-fiche-modal" aria-label="Fermer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="fiche-etoile-preview" id="fiche-etoile-preview">
+                <!-- Fiche content will be generated here -->
+            </div>
+            <div class="viewer-footer">
+                <button class="viewer-btn download" id="fiche-print-modal-btn">
+                    <i class="fas fa-print"></i> Imprimer
+                </button>
+                <button class="viewer-btn close" id="fiche-close-modal-btn">
+                    <i class="fas fa-times"></i> Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+    <!-- SheetJS Library for Excel Import/Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
     <!-- Core Scripts -->
     <script src="src/core/auth.js"></script>
     <script src="src/core/data-manager.js"></script>
@@ -554,6 +804,9 @@
     <script src="src/modules/activity.js"></script>
     <script src="src/modules/forms.js"></script>
     <script src="src/modules/training.js"></script>
+    <script src="src/modules/google-sheets.js"></script>
+    <script src="src/modules/rejects.js"></script>
+    <script src="src/modules/fiche-etoile.js"></script>
 
     <!-- App Initialization -->
     <script src="src/app.js"></script>

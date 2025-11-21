@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
     DocumentsModule.init();
     FormsModule.init();
     TrainingDocumentsModule.init(); // Initialize training documents system
+    GoogleSheetsModule.init(); // Initialize Google Sheets integration
+    RejectAnalysis.init(); // Initialize reject analysis system
     // TrainingModule.init(); // Removed - legacy interactive modules no longer used
     ChartModule.init();
 

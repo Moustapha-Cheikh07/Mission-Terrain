@@ -81,40 +81,52 @@ Mission-Project/
 ├── index.html                    # Page principale
 ├── login.html                    # Page de connexion
 ├── README.md                     # Ce fichier
-├── ARCHITECTURE.md               # Guide de l'architecture (développeurs)
+├── .gitignore                    # Fichiers à ignorer par Git
 │
-├── docs/                         # Documentation
-│   ├── GUIDE_DONNEES.md
-│   ├── GUIDE_FORMATION_PROFESSIONNELLE.md
-│   └── GUIDE_NOUVELLES_FONCTIONNALITES.md
+├── docs/                         # 📚 Documentation complète
+│   ├── README.md                 # Index de la documentation
+│   ├── setup/                    # Guides d'installation
+│   ├── guides/                   # Guides d'utilisation
+│   ├── architecture/             # Documentation technique
+│   └── changelog/                # Historique des changements
 │
 ├── assets/                       # Ressources statiques
-│   ├── images/                   # Images et logos
-│   └── styles/                   # Fichiers CSS
-│       ├── main.css             # Styles de base
-│       ├── components.css       # Composants UI
-│       └── responsive.css       # Design responsive
+│   ├── css/                      # Fichiers CSS
+│   │   ├── main.css             # Styles de base
+│   │   ├── components.css       # Composants UI
+│   │   └── responsive.css       # Design responsive
+│   ├── js/                       # Scripts standalone
+│   │   └── data.js              # Données de démonstration
+│   └── images/                   # Images et logos
+│       └── merlin-gerin-logo.png
 │
 └── src/                          # Code source JavaScript
+    ├── app.js                    # Initialisation de l'application
+    │
+    ├── config/                   # Configuration
+    │   ├── .env.example          # Exemple de configuration
+    │   └── google-sheets-config.example.js
+    │
     ├── core/                     # Modules centraux
     │   ├── auth.js              # Authentification
     │   ├── data-manager.js      # Gestion des données
     │   └── utils.js             # Fonctions utilitaires
     │
     ├── modules/                  # Modules fonctionnels
-    │   ├── chart.js             # Graphiques
     │   ├── navigation.js        # Navigation
+    │   ├── chart.js             # Graphiques
     │   ├── results.js           # Résultats qualité
     │   ├── documents.js         # Dossiers qualité
     │   ├── forms.js             # Formulaires
     │   ├── activity.js          # Activités récentes
-    │   └── training.js          # Formation
+    │   ├── training.js          # Formation professionnelle
+    │   ├── rejects.js           # Analyse des rebuts
+    │   ├── fiche-etoile.js      # Fiches étoiles
+    │   └── google-sheets.js     # Intégration Google Sheets
     │
-    ├── ui/                       # Interface utilisateur
-    │   ├── ui-manager.js        # Gestion UI globale
-    │   └── auth-ui.js           # Interface auth
-    │
-    └── app.js                    # Initialisation
+    └── ui/                       # Interface utilisateur
+        ├── ui-manager.js        # Gestion UI globale
+        └── auth-ui.js           # Interface d'authentification
 ```
 
 ## 📋 Technologies Utilisées
@@ -159,7 +171,7 @@ Les couleurs et styles peuvent être facilement modifiés dans `assets/styles/ma
 ```
 
 ### Architecture Modulaire
-Pour ajouter de nouvelles fonctionnalités, consultez `ARCHITECTURE.md` qui explique :
+Pour ajouter de nouvelles fonctionnalités, consultez `docs/architecture/ARCHITECTURE.md` qui explique :
 - La structure des modules
 - Comment ajouter un nouveau module
 - Les conventions de nommage
@@ -200,7 +212,7 @@ Les données sont stockées localement dans le navigateur via **localStorage** :
 ## 🚧 Développement
 
 ### Pour les Développeurs
-Consultez **`ARCHITECTURE.md`** pour :
+Consultez **`docs/architecture/ARCHITECTURE.md`** pour :
 - Comprendre la structure du projet
 - Apprendre à ajouter de nouvelles fonctionnalités
 - Suivre les bonnes pratiques
@@ -231,7 +243,7 @@ find assets/styles -name "*.css" -exec wc -l {} + | tail -1
 
 Pour toute question :
 1. Consultez `README.md` (ce fichier)
-2. Lisez `ARCHITECTURE.md` pour les aspects techniques
+2. Lisez `docs/architecture/ARCHITECTURE.md` pour les aspects techniques
 3. Parcourez les guides dans le dossier `docs/`
 
 ## 👥 Équipe

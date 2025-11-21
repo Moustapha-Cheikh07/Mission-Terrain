@@ -76,5 +76,40 @@
         width: 100%;
         justify-content: center;
     }
+
+    /* Reject Analysis Responsive */
+    .reject-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rejects-container {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    .results-table {
+        font-size: 0.8rem;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 0.5rem;
+    }
+
+    /* Hide less important columns on mobile */
+    .results-table th:nth-child(3),
+    .results-table td:nth-child(3),
+    .results-table th:nth-child(5),
+    .results-table td:nth-child(5) {
+        display: none;
+    }
 }
 
