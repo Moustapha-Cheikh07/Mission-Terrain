@@ -13,28 +13,47 @@ const FicheEtoileModule = {
         // Form submit
         const form = document.getElementById('fiche-etoile-form');
         if (form) {
+            // Disable HTML5 validation completely
+            form.setAttribute('novalidate', 'novalidate');
+
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.submitFiche();
+                return false;
             });
         }
 
         // Preview button
         const previewBtn = document.getElementById('preview-fiche-btn');
         if (previewBtn) {
-            previewBtn.addEventListener('click', () => this.previewFiche());
+            previewBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                this.previewFiche();
+                return false;
+            });
         }
 
-        // Print button (in form)
+        // Print button (in form) - Removed from form, only available for saved fiches
         const printBtn = document.getElementById('print-fiche-btn');
         if (printBtn) {
-            printBtn.addEventListener('click', () => this.printFiche());
+            printBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.printFiche();
+            });
         }
 
-        // Download Excel button (in form)
+        // Download Excel button (in form) - Removed from form, only available for saved fiches
         const downloadExcelBtn = document.getElementById('download-excel-btn');
         if (downloadExcelBtn) {
-            downloadExcelBtn.addEventListener('click', () => this.downloadExcel());
+            downloadExcelBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.downloadExcel();
+            });
         }
 
         // Print button (in modal)
@@ -85,14 +104,48 @@ const FicheEtoileModule = {
         };
     },
 
+    // Convert ISO date (YYYY-MM-DD) to French format (DD/MM/YYYY)
+    convertISOtoFrench: function(isoDate) {
+        if (!isoDate) return '';
+        const parts = isoDate.split('-');
+        if (parts.length !== 3) return isoDate;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    },
+
+    // Convert French date (DD/MM/YYYY) to ISO format (YYYY-MM-DD)
+    convertFrenchToISO: function(frenchDate) {
+        if (!frenchDate) return '';
+        const parts = frenchDate.split('/');
+        if (parts.length !== 3) return frenchDate;
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    },
+
     validateForm: function() {
         const data = this.getFormData();
+        const errorMessage = document.getElementById('fiche-error-message');
+        const errorText = document.getElementById('fiche-error-text');
 
+        // Check required fields
         if (!data.reference || !data.emetteur || !data.dateFabrication ||
             !data.date || !data.quantite || !data.description ||
             !data.actions || !data.delai) {
+
+            if (errorText) errorText.textContent = 'Veuillez remplir tous les champs obligatoires';
+            if (errorMessage) {
+                errorMessage.style.display = 'block';
+                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+            }
+
             this.showMessage('Veuillez remplir tous les champs obligatoires', 'warning');
             return false;
+        }
+
+        // Hide error message if validation passes
+        if (errorMessage) {
+            errorMessage.style.display = 'none';
         }
 
         return true;
@@ -100,13 +153,43 @@ const FicheEtoileModule = {
 
     formatDate: function(dateStr) {
         if (!dateStr) return '';
+
+        // If already in DD/MM/YYYY format, return as is
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+            return dateStr;
+        }
+
+        // If in ISO format (YYYY-MM-DD), convert to French
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+            return this.convertISOtoFrench(dateStr);
+        }
+
+        // Otherwise, try to parse as date
         const date = new Date(dateStr);
-        return date.toLocaleDateString('fr-FR');
+        if (isNaN(date.getTime())) return dateStr; // Return original if invalid
+
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
     },
 
     generateFicheHTML: function(data) {
         return `
             <div class="fiche-etoile-document">
+                <!-- Green Header -->
+                <div class="fiche-green-header">
+                    <h2>Fiche Étoile - Produit Défectueux</h2>
+                </div>
+
+                <!-- Title Section -->
+                <div class="fiche-title-section">
+                    <div class="fiche-title-icon">
+                        <img src="assets/images/merlin-gerin-logo.png" alt="Merlin Gerin Logo" style="width: 100%; height: auto; max-width: 120px;">
+                    </div>
+                    <h1 class="fiche-main-title">Fiche Étoile<br>- Produit Défectueux</h1>
+                </div>
+
                 <!-- Header Row -->
                 <div class="fiche-header-row">
                     <div class="fiche-box">
@@ -406,55 +489,76 @@ const FicheEtoileModule = {
     },
 
     generateAndPrintPDF: function(data, download = false) {
-        const ficheHTML = this.generateFicheHTML(data);
-
-        // Create temporary container
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = ficheHTML;
-        tempDiv.style.position = 'absolute';
-        tempDiv.style.left = '-9999px';
-        tempDiv.style.width = '210mm'; // A4 width
-        document.body.appendChild(tempDiv);
-
-        const element = tempDiv.querySelector('.fiche-etoile-document');
-
-        const opt = {
-            margin: 10,
-            filename: `Fiche-Etoile-${data.reference}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                letterRendering: true
-            },
-            jsPDF: {
-                unit: 'mm',
-                format: 'a4',
-                orientation: 'portrait'
-            }
-        };
-
         if (download) {
             // Download PDF
+            const ficheHTML = this.generateFicheHTML(data);
+
+            // Create temporary container
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = ficheHTML;
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.left = '-9999px';
+            tempDiv.style.width = '210mm'; // A4 width
+            document.body.appendChild(tempDiv);
+
+            const element = tempDiv.querySelector('.fiche-etoile-document');
+
+            const opt = {
+                margin: 10,
+                filename: `Fiche-Etoile-${data.reference}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    letterRendering: true
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                }
+            };
+
             html2pdf().set(opt).from(element).save().then(() => {
                 document.body.removeChild(tempDiv);
                 this.showMessage('Fiche téléchargée avec succès!', 'success');
             });
         } else {
-            // Print PDF
-            html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
-                // Open in new window for printing
-                const blob = pdf.output('blob');
-                const url = URL.createObjectURL(blob);
-                const printWindow = window.open(url);
-                if (printWindow) {
-                    printWindow.addEventListener('load', () => {
-                        printWindow.print();
+            // Print directly from current page - show in modal and use window.print()
+            const ficheHTML = this.generateFicheHTML(data);
+
+            const previewContainer = document.getElementById('fiche-etoile-preview');
+            if (previewContainer) {
+                previewContainer.innerHTML = ficheHTML;
+            }
+
+            // Show modal
+            const modal = document.getElementById('fiche-etoile-modal');
+            if (modal) {
+                modal.classList.add('active');
+                modal.style.display = 'flex';
+
+                // Wait for content to render and images to load, then print
+                setTimeout(() => {
+                    // Ensure all images are loaded
+                    const images = modal.querySelectorAll('img');
+                    const imagePromises = Array.from(images).map(img => {
+                        if (img.complete) return Promise.resolve();
+                        return new Promise(resolve => {
+                            img.onload = resolve;
+                            img.onerror = resolve;
+                        });
                     });
-                }
-                document.body.removeChild(tempDiv);
-            });
+
+                    Promise.all(imagePromises).then(() => {
+                        // Extra small delay to ensure rendering is complete
+                        setTimeout(() => {
+                            window.print();
+                        }, 100);
+                    });
+                }, 300);
+            }
         }
     },
 
@@ -532,7 +636,10 @@ const FicheEtoileModule = {
         let html = '';
         fiches.forEach(fiche => {
             const date = new Date(fiche.createdAt);
-            const dateStr = date.toLocaleDateString('fr-FR');
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const dateStr = `${day}/${month}/${year}`;
             const timeStr = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
             html += `

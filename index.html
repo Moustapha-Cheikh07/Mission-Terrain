@@ -194,31 +194,18 @@
                     <div class="filter-controls">
                         <select id="reject-machine-filter" class="filter-select">
                             <option value="all">Toutes les machines</option>
-                            <option value="850MS158">850MS158</option>
-                            <option value="850MS150">850MS150</option>
-                            <option value="850MS146">850MS146</option>
-                            <option value="850MS144">850MS144</option>
-                            <option value="850MS143">850MS143</option>
-                            <option value="850MS135">850MS135</option>
-                            <option value="850MS130">850MS130</option>
-                            <option value="850MS125">850MS125</option>
-                            <option value="850MS123">850MS123</option>
-                            <option value="850MS122">850MS122</option>
-                            <option value="850MS120">850MS120</option>
-                            <option value="850MS117">850MS117</option>
-                            <option value="850MS091">850MS091</option>
-                            <option value="850MS087">850MS087</option>
-                            <option value="850MS085">850MS085</option>
-                            <option value="850MS077">850MS077</option>
-                            <option value="850MS073">850MS073</option>
-                            <option value="850MS071">850MS071</option>
-                            <option value="850MS070">850MS070</option>
-                            <option value="850MS161">850MS161</option>
-                            <option value="850MS157">850MS157</option>
-                            <option value="850MS155">850MS155</option>
+                            <!-- Options will be populated dynamically by JS -->
                         </select>
-                        <input type="date" id="reject-start-date" class="filter-select" placeholder="Date début">
-                        <input type="date" id="reject-end-date" class="filter-select" placeholder="Date fin">
+                        <div class="date-input-wrapper">
+                            <input type="text" id="reject-start-date" class="filter-select date-input-text" placeholder="jj/mm/aaaa" pattern="\d{2}/\d{2}/\d{4}">
+                            <input type="date" id="reject-start-date-picker" class="date-input-picker" tabindex="-1">
+                            <i class="fas fa-calendar-alt date-calendar-icon"></i>
+                        </div>
+                        <div class="date-input-wrapper">
+                            <input type="text" id="reject-end-date" class="filter-select date-input-text" placeholder="jj/mm/aaaa" pattern="\d{2}/\d{2}/\d{4}">
+                            <input type="date" id="reject-end-date-picker" class="date-input-picker" tabindex="-1">
+                            <i class="fas fa-calendar-alt date-calendar-icon"></i>
+                        </div>
                         <!-- Bouton Filtrer masqué : le filtrage se fait automatiquement -->
                         <button id="apply-reject-filters" class="action-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; display: none;">
                             <i class="fas fa-filter"></i>
@@ -408,6 +395,14 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <label for="doc-upload-machine">Machine *</label>
+                            <select id="doc-upload-machine" required>
+                                <option value="">Sélectionner une machine</option>
+                                <!-- Options will be populated by JS -->
+                            </select>
+                            <small class="file-info">Sélectionnez la machine associée à ce document</small>
+                        </div>
+                        <div class="form-group">
                             <label for="doc-upload-description">Description (optionnel)</label>
                             <textarea id="doc-upload-description" rows="3" placeholder="Description du document..."></textarea>
                         </div>
@@ -433,6 +428,27 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Machine Tabs Section -->
+            <div class="machine-tabs-section" style="margin-bottom: 1.5rem;">
+                <div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 2px solid #2196f3; border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 0;">
+                    <h3 style="margin: 0; color: #0d47a1; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-industry"></i>
+                        Machines Spéciales
+                    </h3>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #1565c0;">
+                        Sélectionnez une machine pour consulter ses documents qualité
+                    </p>
+                </div>
+                <div class="machine-tabs-container" id="machine-tabs-container">
+                    <!-- Tabs will be generated by JS -->
+                </div>
+                <div id="machine-tab-info" style="padding: 0.75rem 1rem; background: #e3f2fd; border-bottom: 2px solid #2196f3; display: none;">
+                    <strong style="color: #0d47a1; font-size: 0.9rem;">
+                        <i class="fas fa-folder-open"></i> <span id="machine-tab-count">0</span> document(s) pour la machine <span id="machine-tab-name"></span>
+                    </strong>
                 </div>
             </div>
 
@@ -464,62 +480,76 @@
                         <i class="fas fa-star" style="color: #f59e0b;"></i>
                         <h2>Fiche Étoile - Produit Défectueux</h2>
                     </div>
-                    <form id="fiche-etoile-form" class="quality-form">
+                    <form id="fiche-etoile-form" class="quality-form" novalidate>
                         <div class="form-group">
-                            <label for="fiche-reference">Référence</label>
-                            <input type="text" id="fiche-reference" placeholder="Ex: REF-2025-001" required>
+                            <label for="fiche-reference">Référence <span style="color: #ef4444;">*</span></label>
+                            <input type="text" id="fiche-reference" placeholder="Ex: REF-2025-001">
                         </div>
                         <div class="form-group">
-                            <label for="fiche-emetteur">Émetteur</label>
-                            <input type="text" id="fiche-emetteur" placeholder="Nom de l'émetteur" required>
+                            <label for="fiche-emetteur">Émetteur <span style="color: #ef4444;">*</span></label>
+                            <input type="text" id="fiche-emetteur" placeholder="Nom de l'émetteur">
                         </div>
                         <div class="form-group">
-                            <label for="fiche-date-fabrication">Date de fabrication</label>
-                            <input type="date" id="fiche-date-fabrication" required>
+                            <label for="fiche-date-fabrication">Date de fabrication <span style="color: #ef4444;">*</span></label>
+                            <div class="date-input-wrapper">
+                                <input type="text" id="fiche-date-fabrication" placeholder="jj/mm/aaaa" pattern="\d{2}/\d{2}/\d{4}" class="date-input-text">
+                                <input type="date" id="fiche-date-fabrication-picker" class="date-input-picker" tabindex="-1">
+                                <i class="fas fa-calendar-alt date-calendar-icon"></i>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label for="fiche-date">Date</label>
-                            <input type="date" id="fiche-date" required>
+                            <label for="fiche-date">Date <span style="color: #ef4444;">*</span></label>
+                            <div class="date-input-wrapper">
+                                <input type="text" id="fiche-date" placeholder="jj/mm/aaaa" pattern="\d{2}/\d{2}/\d{4}" class="date-input-text">
+                                <input type="date" id="fiche-date-picker" class="date-input-picker" tabindex="-1">
+                                <i class="fas fa-calendar-alt date-calendar-icon"></i>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label for="fiche-quantite">Quantité</label>
-                            <input type="number" id="fiche-quantite" min="1" required>
+                            <label for="fiche-quantite">Quantité <span style="color: #ef4444;">*</span></label>
+                            <input type="number" id="fiche-quantite" min="1">
                         </div>
                         <div class="form-group">
                             <label for="fiche-avis-qualite">N° avis qualité</label>
                             <input type="text" id="fiche-avis-qualite" placeholder="Ex: AQ-2025-001">
                         </div>
                         <div class="form-group">
-                            <label for="fiche-description">Description du problème</label>
-                            <textarea id="fiche-description" rows="4" placeholder="Décrivez le problème rencontré..." required></textarea>
+                            <label for="fiche-description">Description du problème <span style="color: #ef4444;">*</span></label>
+                            <textarea id="fiche-description" rows="4" placeholder="Décrivez le problème rencontré..."></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="fiche-actions">Actions</label>
-                            <textarea id="fiche-actions" rows="3" placeholder="Actions correctives à mettre en place..." required></textarea>
+                            <label for="fiche-actions">Actions <span style="color: #ef4444;">*</span></label>
+                            <textarea id="fiche-actions" rows="3" placeholder="Actions correctives à mettre en place..."></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="fiche-delai">Délai</label>
-                            <input type="date" id="fiche-delai" required>
+                            <label for="fiche-delai">Délai <span style="color: #ef4444;">*</span></label>
+                            <div class="date-input-wrapper">
+                                <input type="text" id="fiche-delai" placeholder="jj/mm/aaaa" pattern="\d{2}/\d{2}/\d{4}" class="date-input-text">
+                                <input type="date" id="fiche-delai-picker" class="date-input-picker" tabindex="-1">
+                                <i class="fas fa-calendar-alt date-calendar-icon"></i>
+                            </div>
+                        </div>
+                        <!-- Error message container -->
+                        <div id="fiche-error-message" style="display: none; padding: 1rem; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px; margin-top: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; color: #92400e;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong id="fiche-error-text">Veuillez remplir tous les champs obligatoires</strong>
+                            </div>
                         </div>
                         <div class="form-actions" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                             <button type="submit" class="submit-btn" style="flex: 1;">
                                 <i class="fas fa-paper-plane"></i>
                                 Envoyer la fiche
                             </button>
-                            <button type="button" id="preview-fiche-btn" class="action-btn" style="flex: 1; background: #3b82f6;">
-                                <i class="fas fa-eye"></i>
-                                Prévisualiser
-                            </button>
-                            <button type="button" id="print-fiche-btn" class="action-btn" style="flex: 1; background: #8b5cf6;">
-                                <i class="fas fa-print"></i>
-                                Imprimer
-                            </button>
-                            <button type="button" id="download-excel-btn" class="action-btn" style="flex: 1; background: #10b981;">
-                                <i class="fas fa-file-excel"></i>
-                                Télécharger Excel
-                            </button>
                         </div>
                     </form>
+                    <!-- Preview button outside form to avoid any form submission -->
+                    <div style="margin-top: 1rem;">
+                        <button type="button" id="preview-fiche-btn" class="action-btn" style="width: 100%; background: #3b82f6;">
+                            <i class="fas fa-eye"></i>
+                            Prévisualiser
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -805,6 +835,7 @@
     <script src="src/modules/forms.js"></script>
     <script src="src/modules/training.js"></script>
     <script src="src/modules/google-sheets.js"></script>
+    <script src="src/modules/date-input-hybrid.js"></script>
     <script src="src/modules/rejects.js"></script>
     <script src="src/modules/fiche-etoile.js"></script>
 

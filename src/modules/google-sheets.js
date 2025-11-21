@@ -62,6 +62,22 @@ const GoogleSheetsModule = {
         }
     },
 
+    // Clean old/large data from localStorage to free space (useful for mobile)
+    cleanLocalStorage: function() {
+        try {
+            // Remove old sample data that might be taking space
+            const keysToClean = ['mg_results', 'mg_documents', 'mg_rejects', 'fichesEtoiles'];
+            keysToClean.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    console.log(`Removing old data: ${key}`);
+                    localStorage.removeItem(key);
+                }
+            });
+        } catch (error) {
+            console.error('Error cleaning localStorage:', error);
+        }
+    },
+
     // Save configuration to localStorage
     saveConfiguration: function() {
         try {
@@ -75,7 +91,11 @@ const GoogleSheetsModule = {
             localStorage.setItem('googleSheetsAutoRefresh', this.config.autoRefresh);
             console.log('Configuration saved');
         } catch (error) {
-            console.error('Error saving configuration:', error);
+            if (error.name === 'QuotaExceededError') {
+                console.warn('localStorage quota exceeded - configuration not persisted');
+            } else {
+                console.error('Error saving configuration:', error);
+            }
         }
     },
 
@@ -289,9 +309,26 @@ const GoogleSheetsModule = {
             this.cachedData = rejects;
             this.lastRefresh = new Date();
 
-            // Save to localStorage
-            localStorage.setItem('googleSheetsData', JSON.stringify(rejects));
-            localStorage.setItem('googleSheetsLastRefresh', this.lastRefresh.toISOString());
+            // Save to localStorage with error handling for mobile quota limits
+            try {
+                localStorage.setItem('googleSheetsData', JSON.stringify(rejects));
+                localStorage.setItem('googleSheetsLastRefresh', this.lastRefresh.toISOString());
+            } catch (e) {
+                if (e.name === 'QuotaExceededError') {
+                    console.warn('localStorage quota exceeded - attempting to clean and retry');
+                    // Try to clean old data and retry once
+                    this.cleanLocalStorage();
+                    try {
+                        localStorage.setItem('googleSheetsData', JSON.stringify(rejects));
+                        localStorage.setItem('googleSheetsLastRefresh', this.lastRefresh.toISOString());
+                        console.log('Successfully saved after cleaning');
+                    } catch (retryError) {
+                        console.warn('Still not enough space - data will work in current session only');
+                    }
+                } else {
+                    console.error('Error saving to localStorage:', e);
+                }
+            }
 
             this.updateUIStatus();
 

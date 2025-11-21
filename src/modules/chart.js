@@ -378,7 +378,11 @@ const ChartModule = {
             if (this.hoveredIndex >= 0 && this.tooltip) {
                 const value = this.data.rates[this.hoveredIndex];
                 const date = this.data.fullDates[this.hoveredIndex];
-                const formattedDate = new Date(date).toLocaleDateString('fr-FR');
+                const d = new Date(date);
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                const formattedDate = `${day}/${month}/${year}`;
 
                 this.tooltip.textContent = `${formattedDate}: ${value.toFixed(1)}%`;
                 this.tooltip.style.left = (e.clientX + 10) + 'px';
@@ -403,7 +407,11 @@ const ChartModule = {
     handleClick: function(e) {
         if (this.hoveredIndex >= 0 && this.data) {
             const date = this.data.fullDates[this.hoveredIndex];
-            const formattedDate = new Date(date).toLocaleDateString('fr-FR');
+            const d = new Date(date);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            const formattedDate = `${day}/${month}/${year}`;
             UIModule.showToast(`Données du ${formattedDate} sélectionnées`, 'success');
         }
     }

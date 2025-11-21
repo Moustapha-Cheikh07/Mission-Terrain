@@ -2,12 +2,145 @@
 // QUALITY DOCUMENTS MODULE - Professional document management system
 // ===========================================
 const DocumentsModule = {
+    currentMachineFilter: 'all', // Track current filter
+
     init: function() {
         this.setupUploadButton();
         this.setupUploadForm();
+        this.generateMachineTabs();
+        this.populateMachineSelects();
         this.displayDocuments();
         this.setupSearch();
         this.updateUIBasedOnAuth();
+    },
+
+    // Generate machine tabs
+    generateMachineTabs: function() {
+        const tabsContainer = document.getElementById('machine-tabs-container');
+        if (!tabsContainer) return;
+
+        const machines = DataManager.getMSMachines();
+
+        if (machines.length === 0) {
+            tabsContainer.innerHTML = `
+                <div style="padding: 2rem; text-align: center; color: #64748b;">
+                    <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>Aucune machine disponible. Veuillez d'abord ajouter des données de rebuts.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Clear existing tabs
+        tabsContainer.innerHTML = '';
+
+        // Create tab for each machine
+        machines.forEach((machine, index) => {
+            const documents = DataManager.getDocumentsByMachine(machine);
+            const tab = document.createElement('button');
+            tab.className = 'machine-tab';
+            tab.dataset.machine = machine;
+
+            // First tab is active by default
+            if (index === 0) {
+                tab.classList.add('active');
+                this.currentMachineFilter = machine;
+            }
+
+            tab.innerHTML = `
+                <span class="machine-tab-icon">
+                    <i class="fas fa-industry"></i>
+                </span>
+                <span class="machine-tab-name">${machine}</span>
+                <span class="machine-tab-count">${documents.length} doc(s)</span>
+            `;
+
+            tab.addEventListener('click', () => {
+                this.selectMachineTab(machine);
+            });
+
+            tabsContainer.appendChild(tab);
+        });
+
+        // Update tab info
+        this.updateTabInfo();
+    },
+
+    // Select machine tab
+    selectMachineTab: function(machine) {
+        this.currentMachineFilter = machine;
+
+        // Update active tab
+        const tabs = document.querySelectorAll('.machine-tab');
+        tabs.forEach(tab => {
+            if (tab.dataset.machine === machine) {
+                tab.classList.add('active');
+            } else {
+                tab.classList.remove('active');
+            }
+        });
+
+        // Update display
+        this.displayDocuments();
+        this.updateTabInfo();
+
+        // Scroll to documents smoothly
+        const documentsSection = document.querySelector('.training-documents-section');
+        if (documentsSection) {
+            documentsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    },
+
+    // Update tab info display
+    updateTabInfo: function() {
+        const tabInfo = document.getElementById('machine-tab-info');
+        const tabCount = document.getElementById('machine-tab-count');
+        const tabName = document.getElementById('machine-tab-name');
+
+        if (!tabInfo || !tabCount || !tabName) return;
+
+        if (this.currentMachineFilter) {
+            const documents = DataManager.getDocumentsByMachine(this.currentMachineFilter);
+            tabCount.textContent = documents.length;
+            tabName.textContent = this.currentMachineFilter;
+            tabInfo.style.display = 'block';
+        } else {
+            tabInfo.style.display = 'none';
+        }
+    },
+
+    // Refresh tabs (call after adding/deleting documents)
+    refreshTabs: function() {
+        const tabs = document.querySelectorAll('.machine-tab');
+        tabs.forEach(tab => {
+            const machine = tab.dataset.machine;
+            const documents = DataManager.getDocumentsByMachine(machine);
+            const countElement = tab.querySelector('.machine-tab-count');
+            if (countElement) {
+                countElement.textContent = `${documents.length} doc(s)`;
+            }
+        });
+        this.updateTabInfo();
+    },
+
+    // Populate machine select dropdowns
+    populateMachineSelects: function() {
+        const machines = DataManager.getMSMachines();
+
+        // Populate upload form dropdown
+        const uploadMachineSelect = document.getElementById('doc-upload-machine');
+        if (uploadMachineSelect) {
+            // Clear all existing options
+            uploadMachineSelect.innerHTML = '<option value="">Sélectionner une machine</option>';
+
+            // Add machine options
+            machines.forEach(machine => {
+                const option = document.createElement('option');
+                option.value = machine;
+                option.textContent = machine;
+                uploadMachineSelect.appendChild(option);
+            });
+        }
     },
 
     // Setup upload button visibility based on authentication
@@ -36,6 +169,8 @@ const DocumentsModule = {
     showUploadForm: function() {
         const uploadSection = document.getElementById('doc-admin-upload-section');
         if (uploadSection) {
+            // Populate machine select when showing form
+            this.populateMachineSelects();
             uploadSection.style.display = 'block';
             uploadSection.scrollIntoView({ behavior: 'smooth' });
         }
@@ -143,6 +278,7 @@ const DocumentsModule = {
             const docData = {
                 title: document.getElementById('doc-upload-title').value,
                 category: document.getElementById('doc-upload-category').value,
+                machine: document.getElementById('doc-upload-machine').value,
                 description: document.getElementById('doc-upload-description').value || '',
                 fileName: file.name,
                 fileType: file.type,
@@ -180,6 +316,7 @@ const DocumentsModule = {
                 form.reset();
                 document.getElementById('doc-file-name').textContent = 'Aucun fichier sélectionné';
                 this.hideUploadForm();
+                this.refreshTabs(); // Refresh tab counts
                 this.displayDocuments();
                 UIModule.updateStats(); // Update document count
             } else {
@@ -210,7 +347,8 @@ const DocumentsModule = {
         const documentsGrid = document.getElementById('documents-grid');
         if (!documentsGrid) return;
 
-        const documents = DataManager.getDocuments();
+        // Get documents filtered by machine
+        const documents = DataManager.getDocumentsByMachine(this.currentMachineFilter);
 
         if (documents.length === 0) {
             documentsGrid.innerHTML = `
@@ -292,7 +430,10 @@ const DocumentsModule = {
                 <div class="doc-info">
                     <h3>${doc.title}</h3>
                     ${doc.description ? `<p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">${doc.description}</p>` : ''}
-                    <span class="doc-category">${categoryNames[doc.category] || doc.category}</span>
+                    <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
+                        <span class="doc-category">${categoryNames[doc.category] || doc.category}</span>
+                        ${doc.machine ? `<span class="doc-category" style="background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);"><i class="fas fa-industry"></i> ${doc.machine}</span>` : ''}
+                    </div>
                     <div class="doc-meta">
                         <span><i class="fas fa-file"></i> ${fileSize}</span>
                         <span><i class="fas fa-calendar"></i> ${uploadDate}</span>
@@ -540,6 +681,7 @@ const DocumentsModule = {
                 });
 
                 UIModule.showToast('Document supprimé avec succès', 'success');
+                this.refreshTabs(); // Refresh tab counts
                 this.displayDocuments();
                 UIModule.updateStats(); // Update document count
             } else {
@@ -578,6 +720,8 @@ const DocumentsModule = {
     // Update UI based on authentication status
     updateUIBasedOnAuth: function() {
         this.setupUploadButton();
+        this.populateMachineSelects();
+        this.generateMachineTabs();
         this.displayDocuments();
     }
 };

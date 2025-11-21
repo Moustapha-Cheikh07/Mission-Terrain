@@ -9,8 +9,66 @@ const RejectAnalysis = {
 
     chart: null,
 
+    // Convert Date object to ISO format (YYYY-MM-DD) for input[type=date]
+    formatDateToISO: function(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${year}-${month}-${day}`;
+    },
+
+    // Convert Date object to DD/MM/YYYY format for display
+    formatDateToFrench: function(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    },
+
+    // Convert ISO date (YYYY-MM-DD) to Date object
+    parseISODate: function(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return null;
+        return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    },
+
+    // Convert DD/MM/YYYY to Date object
+    parseFrenchDate: function(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split('/');
+        if (parts.length !== 3) return null;
+        // Month is 0-indexed in JavaScript Date
+        return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+    },
+
+    // Populate machine filter with all MS machines
+    populateMachineFilter: function() {
+        const machineFilter = document.getElementById('reject-machine-filter');
+        if (!machineFilter) return;
+
+        // Get all MS machines from DataManager
+        const machines = DataManager.getMSMachines();
+
+        // Keep the "Toutes les machines" option and clear the rest
+        while (machineFilter.options.length > 1) {
+            machineFilter.remove(1);
+        }
+
+        // Add all machines
+        machines.forEach(machine => {
+            const option = document.createElement('option');
+            option.value = machine;
+            option.textContent = machine;
+            machineFilter.appendChild(option);
+        });
+
+        console.log(`Filter populated with ${machines.length} machines`);
+    },
+
     init: function () {
         console.log("RejectAnalysis initialisation...");
+        this.populateMachineFilter();
         this.setupEventListeners();
 
         // Default: last 30 days
@@ -18,11 +76,20 @@ const RejectAnalysis = {
         const monthAgo = new Date(today);
         monthAgo.setDate(today.getDate() - 30);
 
-        this.currentFilters.startDate = monthAgo.toISOString().slice(0, 10);
-        this.currentFilters.endDate = today.toISOString().slice(0, 10);
+        // Store dates in French format for display
+        const startDateFrench = this.formatDateToFrench(monthAgo);
+        const endDateFrench = this.formatDateToFrench(today);
 
-        document.getElementById("reject-start-date").value = this.currentFilters.startDate;
-        document.getElementById("reject-end-date").value = this.currentFilters.endDate;
+        // Set both text and picker inputs
+        document.getElementById("reject-start-date").value = startDateFrench;
+        document.getElementById("reject-end-date").value = endDateFrench;
+
+        document.getElementById("reject-start-date-picker").value = this.formatDateToISO(monthAgo);
+        document.getElementById("reject-end-date-picker").value = this.formatDateToISO(today);
+
+        // Store in French format
+        this.currentFilters.startDate = startDateFrench;
+        this.currentFilters.endDate = endDateFrench;
 
         // Show loading indicator
         this.showLoading();
@@ -160,10 +227,16 @@ const RejectAnalysis = {
                 return false;
             }
 
-            // Date
+            // Date filtering
             const d = new Date(r.date);
-            const dStart = new Date(this.currentFilters.startDate);
-            const dEnd = new Date(this.currentFilters.endDate);
+            const dStart = this.parseFrenchDate(this.currentFilters.startDate);
+            const dEnd = this.parseFrenchDate(this.currentFilters.endDate);
+
+            if (!dStart || !dEnd) return true; // If dates invalid, don't filter
+
+            // Set time to start/end of day for proper comparison
+            dStart.setHours(0, 0, 0, 0);
+            dEnd.setHours(23, 59, 59, 999);
 
             if (d < dStart || d > dEnd) return false;
 
@@ -262,9 +335,15 @@ const RejectAnalysis = {
 
         rejects.sort((a, b) => new Date(b.date) - new Date(a.date))
             .forEach(r => {
+                const d = new Date(r.date);
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                const dateStr = `${day}/${month}/${year}`;
+
                 html += `
                 <tr>
-                    <td>${new Date(r.date).toLocaleDateString("fr-FR")}</td>
+                    <td>${dateStr}</td>
                     <td><b>${r.machine}</b></td>
                     <td>${r.material}</td>
                     <td>${r.description}</td>

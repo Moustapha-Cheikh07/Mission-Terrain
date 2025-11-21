@@ -1619,6 +1619,33 @@
     font-family: Arial, sans-serif;
 }
 
+/* Title Section */
+.fiche-title-section {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 3px solid #000;
+}
+
+.fiche-title-icon {
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fiche-title-icon img {
+    max-width: 120px;
+    height: auto;
+}
+
+.fiche-main-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1.3;
+}
+
 .fiche-header-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1767,47 +1794,215 @@
 
 /* Print Styles */
 @media print {
-    /* Hide everything */
-    body * {
-        visibility: hidden !important;
+    /* Hide unwanted elements */
+    .sidebar,
+    .nav-item,
+    .viewer-header,
+    .viewer-header *,
+    .viewer-footer,
+    .viewer-footer *,
+    .modal .close-btn,
+    .close-viewer,
+    .viewer-btn,
+    button,
+    .action-btn,
+    .submit-btn,
+    .stat-card,
+    .section-header,
+    .form-group,
+    .form-header,
+    .form-header *,
+    .document-card,
+    #message-toast,
+    .close-btn,
+    .modal-header,
+    .modal-footer {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        width: 0 !important;
+        overflow: hidden !important;
     }
 
-    /* Show only the fiche content */
-    #fiche-etoile-preview,
-    #fiche-etoile-preview *,
-    .fiche-etoile-document,
-    .fiche-etoile-document * {
-        visibility: visible !important;
+    /* Hide all h2 except those inside fiche-logo-box */
+    h2 {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* But show h2 inside fiche content */
+    .fiche-logo-box h2,
+    .fiche-etoile-document h2,
+    .fiche-green-header h2 {
         display: block !important;
+        visibility: visible !important;
     }
 
-    /* Make SVG visible */
-    #fiche-etoile-preview svg,
-    #fiche-etoile-preview svg * {
-        display: inline !important;
+    /* Reset body and html */
+    html, body {
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        background: white !important;
     }
 
-    /* Show flex containers */
+    /* Show modal and content */
+    #fiche-etoile-modal {
+        display: block !important;
+        visibility: visible !important;
+        position: static !important;
+        background: white !important;
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .modal-content {
+        display: block !important;
+        visibility: visible !important;
+        position: static !important;
+        background: white !important;
+        box-shadow: none !important;
+        border: none !important;
+        width: 100% !important;
+        height: auto !important;
+        max-width: 100% !important;
+        max-height: none !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Show the preview content */
+    #fiche-etoile-preview,
+    .fiche-etoile-document {
+        display: block !important;
+        visibility: visible !important;
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+        font-size: 12pt !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Green Header for Print */
+    .fiche-green-header {
+        display: block !important;
+        visibility: visible !important;
+        background: linear-gradient(135deg, #10b981, #059669) !important;
+        color: white !important;
+        padding: 1rem !important;
+        text-align: center !important;
+        margin: 0 0 0.8rem 0 !important;
+        page-break-after: avoid !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .fiche-green-header h2 {
+        margin: 0 !important;
+        font-size: 18pt !important;
+        font-weight: 600 !important;
+        color: white !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    /* Title Section for Print - MUST BE VISIBLE */
+    .fiche-title-section,
+    .fiche-title-section *,
+    .fiche-title-icon,
+    .fiche-main-title {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    .fiche-title-section {
+        text-align: center !important;
+        margin-bottom: 0.6rem !important;
+        padding: 0.5rem 0.8rem !important;
+        border-bottom: 2px solid #000 !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+        width: 100% !important;
+    }
+
+    .fiche-title-icon {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        visibility: visible !important;
+        margin: 0 auto 0.2rem auto !important;
+        text-align: center !important;
+    }
+
+    .fiche-title-icon img {
+        max-width: 100px !important;
+        height: auto !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    .fiche-main-title {
+        font-size: 16pt !important;
+        font-weight: bold !important;
+        margin: 0.2rem 0 !important;
+        line-height: 1.2 !important;
+        display: block !important;
+        visibility: visible !important;
+        text-align: center !important;
+        color: #000 !important;
+    }
+
+    /* Ensure h1 and h2 in fiche are visible */
+    .fiche-etoile-document h1,
+    .fiche-etoile-document h2 {
+        display: block !important;
+        visibility: visible !important;
+        color: #000 !important;
+    }
+
+    /* Ensure all content in fiche is visible */
+    .fiche-etoile-document *,
+    .fiche-title-section,
+    .fiche-title-section *,
+    #fiche-etoile-preview *,
+    #fiche-etoile-preview {
+        visibility: visible !important;
+    }
+
+    /* Ensure line breaks work in print */
+    br {
+        display: block !important;
+        content: "" !important;
+        margin: 0.2rem 0 !important;
+    }
+
+    /* Show flex containers properly */
     .fiche-header-row,
     .fiche-content-row,
-    .fiche-actions-row,
-    .fiche-logo-box {
+    .fiche-actions-row {
         display: grid !important;
+        visibility: visible !important;
     }
 
     .fiche-logo-box {
         display: flex !important;
+        visibility: visible !important;
     }
 
-    /* Show tables */
-    .fiche-traceability table,
-    .fiche-traceability tbody,
-    .fiche-traceability thead,
-    .fiche-traceability tr,
-    .fiche-traceability th,
-    .fiche-traceability td {
+    /* Show tables properly */
+    .fiche-traceability table {
         display: table !important;
+        visibility: visible !important;
     }
 
     .fiche-traceability thead {
@@ -1827,39 +2022,84 @@
         display: table-cell !important;
     }
 
-    /* Position the fiche */
-    #fiche-etoile-preview {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .fiche-etoile-document {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        padding: 1cm !important;
-        background: white !important;
-        page-break-after: always !important;
-    }
-
     /* Page settings */
     @page {
         size: A4 portrait;
-        margin: 0;
+        margin: 0.6cm;
     }
 
-    /* Hide modal overlay */
-    .modal,
-    .modal-content,
-    .viewer-header,
-    .viewer-footer,
-    .modal-overlay {
-        display: none !important;
-        visibility: hidden !important;
+    /* Make boxes compact */
+    .fiche-box,
+    .fiche-logo-box,
+    .fiche-description-box,
+    .fiche-actions-box {
+        padding: 0.6rem !important;
+        font-size: 11pt !important;
+        min-height: 70px !important;
+    }
+
+    /* Text in fiche */
+    .fiche-etoile-document p {
+        font-size: 11pt !important;
+        margin: 0.2rem 0 !important;
+        line-height: 1.4 !important;
+    }
+
+    /* Header sizes */
+    .fiche-etoile-document h3 {
+        font-size: 12pt !important;
+        margin: 0.3rem 0 !important;
+        font-weight: bold !important;
+    }
+
+    /* Grid gaps */
+    .fiche-header-row,
+    .fiche-content-row,
+    .fiche-actions-row {
+        gap: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Logo box size and content */
+    .fiche-logo-box {
+        min-height: 100px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    .fiche-logo-box h2 {
+        font-size: 13pt !important;
+        margin: 0.3rem 0 !important;
+        font-weight: bold !important;
+    }
+
+    /* Warning icon */
+    .fiche-logo-box svg {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    /* Table text */
+    .fiche-traceability table {
+        font-size: 10pt !important;
+        width: 100% !important;
+    }
+
+    .fiche-traceability th,
+    .fiche-traceability td {
+        padding: 0.4rem !important;
+        font-size: 10pt !important;
+    }
+
+    /* Description and actions content */
+    .fiche-description-content,
+    .fiche-actions-content {
+        font-size: 11pt !important;
+        line-height: 1.4 !important;
+        padding: 0.4rem !important;
+        min-height: 60px !important;
     }
 
     /* Ensure proper sizing */
@@ -1903,3 +2143,172 @@
 }
 
 /* Responsive Design */
+
+/* Date Input Hybrid (Text + Calendar Picker) */
+.date-input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.date-input-text {
+    width: 100%;
+    padding-right: 2.5rem;
+}
+
+.date-input-picker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    pointer-events: none;
+}
+
+.date-calendar-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    pointer-events: none;
+    font-size: 1rem;
+}
+
+.date-input-wrapper:hover .date-calendar-icon {
+    color: #3b82f6;
+}
+
+/* Green Header for Fiche Etoile - Hidden on screen, shown in print */
+.fiche-green-header {
+    display: none;
+}
+
+.fiche-green-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+}
+
+/* Machine Tabs Styles */
+.machine-tabs-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    background: white;
+    border: 2px solid #2196f3;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+}
+
+.machine-tab {
+    flex: 1 1 auto;
+    min-width: 120px;
+    padding: 1rem 1.25rem;
+    background: white;
+    border: none;
+    border-right: 1px solid #e3f2fd;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1565c0;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.machine-tab:last-child {
+    border-right: none;
+}
+
+.machine-tab:hover {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    color: #0d47a1;
+}
+
+.machine-tab.active {
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    color: white;
+    box-shadow: inset 0 -4px 0 rgba(255, 255, 255, 0.3);
+}
+
+.machine-tab.active:hover {
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+}
+
+.machine-tab-icon {
+    font-size: 1.2rem;
+}
+
+.machine-tab-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.machine-tab-count {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.machine-tab.active .machine-tab-count {
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* Responsive tabs */
+@media (max-width: 1400px) {
+    .machine-tab {
+        min-width: 110px;
+        padding: 0.85rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .machine-tab-icon {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 1200px) {
+    .machine-tab {
+        min-width: 100px;
+        padding: 0.75rem 0.85rem;
+        font-size: 0.8rem;
+    }
+
+    .machine-tab-icon {
+        font-size: 1rem;
+    }
+
+    .machine-tab-name {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .machine-tabs-container {
+        flex-direction: column;
+    }
+
+    .machine-tab {
+        min-width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e3f2fd;
+        padding: 1rem;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .machine-tab:last-child {
+        border-bottom: none;
+    }
+}
